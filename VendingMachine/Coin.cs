@@ -3,9 +3,9 @@ namespace VendingMachine
 {
     public enum Coin
     {        
-        NICKEL,
-        DIME,
-        QUARTER,
-        PENNIE
+        NICKEL = 5,
+        DIME = 10,
+        QUARTER = 25,
+        PENNIE = 100
     };
 }

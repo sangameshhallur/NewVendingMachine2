@@ -16,12 +16,12 @@ namespace VendingMachine
             get
             {
                 return
-                    Count(Coin.QUARTER) * CoinValue(Coin.QUARTER) +
-                    Count(Coin.DIME) * CoinValue(Coin.DIME) +
-                    Count(Coin.NICKEL) * CoinValue(Coin.NICKEL) +
-                    Count(Coin.PENNIE) * CoinValue(Coin.PENNIE);
+                Count(Coin.QUARTER) * (int)Coin.QUARTER +
+                Count(Coin.DIME) * (int)Coin.DIME +
+                Count(Coin.NICKEL) * (int)Coin.NICKEL +
+                Count(Coin.PENNIE) * (int)Coin.PENNIE;
+                }
             }
-        }
 
         private Dictionary<Coin, int> Coins { get; set; }
 
@@ -53,7 +53,7 @@ namespace VendingMachine
             Coins.Clear();
         }
 
-        internal void DispenseInto(CoinCollection collection, int amount)
+        internal void DispenseInto(CoinCollection collection, double amount)
         {
             int numQuartersDispensed = DispenseCoinInto(collection, Coin.QUARTER, amount);
             amount -= numQuartersDispensed * CoinValue(Coin.QUARTER);
@@ -79,32 +79,32 @@ namespace VendingMachine
             return count;
         }
 
-        public int CoinValue(Coin coin)
+        public double CoinValue(Coin coin)
         {
-            int value = 0;
+            double value = 0.0;
 
             if (coin == Coin.QUARTER)
             {
-                value = 25;
+                value = 0.25;
             }
             else if (coin == Coin.DIME)
             {
-                value = 10;
+                value = 0.10;
             }
             else if (coin == Coin.NICKEL)
             {
-                value = 5;
+                value = 0.05;
             }
             else if (coin == Coin.PENNIE)
             {
-                value = 100;
+                value = 1.00;
             }
 
             return value;
         }
-        private int DispenseCoinInto(CoinCollection collection, Coin coin, int amount)
+        private int DispenseCoinInto(CoinCollection collection, Coin coin, double amount)
         {
-            int numDispensed = Math.Min(amount / CoinValue(coin), Count(coin));
+            int numDispensed = (int)Math.Min(amount / CoinValue(coin), Count(coin));
             collection.Insert(coin, numDispensed);
             Remove(coin, numDispensed);
 

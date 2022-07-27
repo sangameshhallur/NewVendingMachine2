@@ -22,38 +22,6 @@ namespace VendingMachine
 
         public ProductCollection Inventory { get; private set; }
 
-        public string Display 
-        { 
-            get
-            {
-                string display;
-
-                if (!string.IsNullOrEmpty(TemporaryDisplay))
-                {
-                    display = TemporaryDisplay;
-                    TemporaryDisplay = string.Empty;
-                }
-                else if(CoinSlot.Value == 0)
-                {
-                    if(CoinBank.Value == 0)
-                    {
-                        display = "EXACT CHANGE ONLY";
-                    }
-                    else
-                    {
-                        display = "INSERT COINS";
-                    }
-                }
-                else
-                {
-                    display = CreateCurrencyString(CoinSlot.Value);
-                }
-
-                return display;
-            }
-        }
-        private string TemporaryDisplay { get; set; }
-
         public void Insert(Coin coin, int num)
         {
             if (coin == Coin.PENNIE)
@@ -76,14 +44,13 @@ namespace VendingMachine
         public void Dispense(Product product)
         {
             int price = GetPrice(product);
-
-             if(CoinSlot.Value >= price)
+            if (CoinSlot.Value >= price)
             {
                 Inventory.Dispense(product);
-                TemporaryDisplay = "Please Collect Your Product: " + product;
-                Console.WriteLine(TemporaryDisplay);
-                int changeDue = CoinSlot.Value - price;
-                if(changeDue > 0)
+                Console.WriteLine("Please Collect Your Product: " + product);
+                int change = CoinSlot.Value - price;
+                double changeDue = (double)change / 100;
+                if (changeDue > 0)
                 {                    
                     CoinBank.DispenseInto(CoinReturn, changeDue);
                     ReturnCoins(changeDue);
@@ -92,14 +59,17 @@ namespace VendingMachine
             }
             else
             {                
-                Console.WriteLine("Invalid Coid or Insufficient Coins, Please try again with different coins");
+                Console.WriteLine("Insufficient Coins, Please add some more coins to purchase the product");
+                Console.WriteLine("----------------------------------------");
+                insertCoins();
+                selectProduct();
             }
-            Console.WriteLine("Thank You....");
+            
         }
 
         public void ReturnCoins(double changeDue)
         {
-            Console.WriteLine("Please collect your change: " + changeDue);
+            Console.WriteLine("Please collect your change: $" + changeDue);
             CoinSlot.EmptyInto(CoinReturn);
         }
 
@@ -125,6 +95,66 @@ namespace VendingMachine
         private string CreateCurrencyString(int amount)
         {
             return string.Format("{0:C}", amount / 100.0);
+        }
+
+        public void insertCoins()
+        {
+            Console.WriteLine("Please insert the coins separated by comma(,) and then press Enter. Example-nickel,dime,quarter");
+            Array enumCoinArray = Enum.GetValues(typeof(Coin));
+            double enumVal;
+            foreach (int enumValue in enumCoinArray)
+            {
+                enumVal = (double)enumValue / 100;
+                Console.WriteLine(Enum.GetName(typeof(Coin), enumValue) + " - $" + enumVal);
+            }
+            Console.WriteLine("----------------------------------------");
+            string value = Console.ReadLine();
+            string[] values = value.Split(",");
+            Coin coin;
+
+            for (int i = 0; i < values.Length; i++)
+            {
+                Enum.TryParse<Coin>(values[i].ToUpper(), out coin);
+                Insert(coin, 1);
+                if (coin != Coin.PENNIE)
+                {
+                    AddToBank(coin, 1);
+                }
+                else
+                {
+                    Console.WriteLine("You have inserted invalid coin PENNIE, Please collect it from return tray");
+                }
+                
+            }
+        }
+
+        public void selectProduct()
+        {
+            double coinValue = (double)CoinSlot.Value / 100;
+            if (coinValue > 0)
+            {
+                Console.WriteLine("Total value of coin inserted is: $" + coinValue);
+                Console.WriteLine("----------------------------------------");
+                Console.WriteLine("Please select the product");
+                Array enumProductArray = Enum.GetValues(typeof(Product));
+                double enumVal;
+                foreach (int enumValue in enumProductArray)
+                {
+                    enumVal = (double)enumValue / 100;
+                    Console.WriteLine(Enum.GetName(typeof(Product), enumValue) + " - $" + enumVal);
+                }
+                Console.WriteLine("----------------------------------------");
+                string prod = Console.ReadLine();
+                Product product;
+                foreach (var item in Enum.GetNames(typeof(Product)))
+                {
+                    if (Enum.TryParse<Product>(prod.ToUpper(), out product))
+                    {
+                        Dispense(product);
+                        break;
+                    }
+                }
+            }
         }
     }
 }

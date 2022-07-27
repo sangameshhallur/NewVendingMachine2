@@ -3,8 +3,8 @@ namespace VendingMachine
 {
     public enum Product
     {
-        COLA,
-        CHIPS,
-        CANDY        
+        COLA = 100,
+        CHIPS = 50,
+        CANDY = 65     
     };
 }
