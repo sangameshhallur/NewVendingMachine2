@@ -21,6 +21,37 @@ namespace VendingMachine
         public CoinCollection CoinBank { get; private set; }
 
         public ProductCollection Inventory { get; private set; }
+        public string Display
+        {
+            get
+            {
+                string display;
+
+                if (!string.IsNullOrEmpty(TemporaryDisplay))
+                {
+                    display = TemporaryDisplay;
+                    TemporaryDisplay = string.Empty;
+                }
+                else if (CoinSlot.Value == 0)
+                {
+                    if (CoinBank.Value == 0)
+                    {
+                        display = "EXACT CHANGE ONLY";
+                    }
+                    else
+                    {
+                        display = "INSERT COINS";
+                    }
+                }
+                else
+                {
+                    display = CreateCurrencyString(CoinSlot.Value);
+                }
+
+                return display;
+            }
+        }
+        private string TemporaryDisplay { get; set; }
 
         public void Insert(Coin coin, int num)
         {
@@ -47,6 +78,7 @@ namespace VendingMachine
             if (CoinSlot.Value >= price)
             {
                 Inventory.Dispense(product);
+                TemporaryDisplay = "THANK YOU";
                 Console.WriteLine("Please Collect Your Product: " + product);
                 int change = CoinSlot.Value - price;
                 double changeDue = (double)change / 100;
@@ -65,6 +97,10 @@ namespace VendingMachine
                 selectProduct();
             }
             
+        }
+        public void ReturnCoins()
+        {
+            CoinSlot.EmptyInto(CoinReturn);
         }
 
         public void ReturnCoins(double changeDue)
@@ -94,7 +130,7 @@ namespace VendingMachine
 
         private string CreateCurrencyString(int amount)
         {
-            return string.Format("{0:C}", amount / 100.0);
+            return "$" + string.Format("{0:0.00}", (double)amount / 100);
         }
 
         public void insertCoins()
